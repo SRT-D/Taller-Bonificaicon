@@ -26,12 +26,12 @@ namespace ProgramacionFuncionalVehiculos
             List<Producto> carrito = new List<Producto>();
             bool salir = false;
 
-           
+
             static Producto AplicarDescuento(decimal porcentaje, Producto producto) => producto with { Precio = producto.Precio * (1 - porcentaje / 100) };
             static Producto AplicarIVA(decimal tasa, Producto producto) => producto with { Precio = producto.Precio * (1 + tasa / 100) };
             static Producto AjustarStock(int cantidad, Producto producto) => producto with { Stock = producto.Stock - cantidad };
 
-            
+
             static Producto GenerarVenta(decimal porcentajeDescuento, decimal tasaIva, int cantidad, Producto producto) =>
                 AjustarStock(cantidad, AplicarIVA(tasaIva, AplicarDescuento(porcentajeDescuento, producto)));
 
@@ -42,7 +42,7 @@ namespace ProgramacionFuncionalVehiculos
                 Console.WriteLine("1. Ir a Comprar ");
                 Console.WriteLine("2. Reporte: Productos Mas Caros");
                 Console.WriteLine("3. Salir");
-                
+
 
                 string opcion = Console.ReadLine();
 
@@ -117,7 +117,7 @@ namespace ProgramacionFuncionalVehiculos
             for (int i = 0; i < carrito.Count; i++)
             {
                 var productoBase = carrito[i];
-                
+
                 var productoFinal = generarVenta(5, 19, 1, productoBase);
 
                 decimal descuentoIndividual = productoBase.Precio * 0.05m;
@@ -143,23 +143,31 @@ namespace ProgramacionFuncionalVehiculos
             Console.ReadKey();
         }
 
-        static void MostrarReporteCaros(List<Producto> inventario)
+
+
+        static List<Producto> GenerarReporte(List<Producto> inventario) =>
+    inventario.GroupBy(producto => producto.Categoria).Select(categoria => categoria.OrderByDescending(producto => producto.Precio).FirstOrDefault())
+              .ToList();
+
+
+        static void ImprimirReporte(List<Producto> listaCaros)
         {
-            var carosPorCat = inventario
-                .GroupBy(producto => producto.Categoria) .Select(categoria => categoria.OrderByDescending(p => p.Precio).FirstOrDefault())
-                .ToList();
-
-            Console.WriteLine("\n--- Producto Mas Caro ---");
-           
-
-            for (int i = 0; i < carosPorCat.Count; i++)
+            Console.WriteLine("\n--- PRODUCTO MÁS CARO POR CATEGORÍA ---");
+            listaCaros.ForEach(producto =>
             {
-                var producto = carosPorCat[i];
                 if (producto != null)
                 {
                     Console.WriteLine("- En " + producto.Categoria + ": " + producto.Nombre + " (" + producto.Precio.ToString("C") + ")");
                 }
-            }
+            });
+        }
+
+
+        static void MostrarReporteCaros(List<Producto> inventario)
+        {
+
+            var datosProcesados = GenerarReporte(inventario);
+            ImprimirReporte(datosProcesados);
         }
     }
 }
